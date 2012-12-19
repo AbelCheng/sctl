@@ -8,7 +8,7 @@ namespace ContinuationTasks.RIA_Client
 	{
 		private T _DomainContext;
 		private TaskQueue _DelayTaskQueue;
-		private int _SubmitInterval;
+		private int _SubmitInterval;		// The delay milliseconds between one submission complete and next start.
 
 		public ContinuationEntities(T domainContext, int submitInterval = 100 /* milliseconds */)
 		{
@@ -31,8 +31,7 @@ namespace ContinuationTasks.RIA_Client
 		}
 
 		private void AddEntity<T1>(EntitySet<T1> entitySet, IEnumerator<T1> toAddEntities,
-			Action<SubmitOperation> onSubmittedEachChange, Action onSubmittedAllChanges)
-			where T1 : Entity
+			Action<SubmitOperation> onSubmittedEachChange, Action onSubmittedAllChanges) where T1 : Entity
 		{
 			if (toAddEntities.MoveNext())
 			{
