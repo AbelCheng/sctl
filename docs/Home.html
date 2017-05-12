@@ -1,0 +1,98 @@
+<div class="wikidoc">
+<p><strong>Project Description</strong></p>
+<p>The Silverlight Continuation Tasks Library provides a simplification to chain a continuation of asynchronous tasks, on completion, to invoke a second task ... one after another to any arbitrary length. The purpose of this library is to reduce Silverlight
+ code from verbose asynchronous callback event handling.</p>
+<p><strong>Quick Samples</strong></p>
+<ul>
+<li><strong><span style="color:#0000ff">TaskQueue</span></strong> Class </li></ul>
+<div style="padding-left:36px">Namespace: ContinuationTasks<br>
+Example:
+<div style="color:black; background-color:white">
+<pre><span style="color:blue">using</span> System;
+<span style="color:blue">using</span> System.Windows;
+<span style="color:blue">using</span> System.Windows.Controls;
+<span style="color:blue">using</span> System.Windows.Media;
+<span style="color:blue">using</span> System.Windows.Media.Animation;
+<span style="color:blue">using</span> System.Windows.Navigation;
+<span style="color:blue">using</span> ContinuationTasks;
+
+<span style="color:blue">namespace</span> MySilverlightApp1.Views
+{
+    <span style="color:blue">public</span> <span style="color:blue">partial</span> <span style="color:blue">class</span> MyPage1 : Page
+    {
+        <span style="color:blue">private</span> <strong>TaskQueue</strong> _DelayReloader;
+
+        <span style="color:blue">public</span> MyPage1()
+        {
+            InitializeComponent();
+
+            _DelayReloader = <span style="color:blue">new</span> TaskQueue();
+            _DelayReloader.AddTask(() =&gt; { domainDataSource1.Load(); }, 100,
+                                   () =&gt; domainDataSource1.CanLoad, 10);
+            _DelayReloader.AddTask(() =&gt; { domainDataSource2.Load(); }, 100,
+                                   () =&gt; domainDataSource2.CanLoad, 10);
+            _DelayReloader.AddTask(() =&gt; { domainDataSource3.Load(); }, 100,
+                                   () =&gt; domainDataSource3.CanLoad, 10);
+            ...
+        }
+
+        <span style="color:blue">private</span> <span style="color:blue">void</span> btnApply_Click(<span style="color:blue">object</span> sender, RoutedEventArgs e)
+        {
+            ...
+                _DelayReloader.<strong>Start</strong>(<span style="color:blue">true</span>);
+            ...
+        }
+    }
+}</pre>
+</div>
+</div>
+<ul>
+<li><strong><span style="color:#0000ff">ContinuationEntities&lt;T&gt;</span></strong> Class
+</li></ul>
+<div style="padding-left:36px">Namespace: ContinuationTasks.RIA_Client<br>
+<em>This class further encapsulates continuations specially for RIA Services client to submit a set of Entities' changes in sequence.</em><br>
+Example:
+<div style="color:black; background-color:white">
+<pre><span style="color:blue">using</span> System;
+<span style="color:blue">using</span> System.Linq;
+<span style="color:blue">using</span> System.Collections.Generic;
+<span style="color:blue">using</span> System.Collections.ObjectModel;
+<span style="color:blue">using</span> System.Windows;
+<span style="color:blue">using</span> System.Windows.Controls;
+<span style="color:blue">using</span> System.Windows.Media;
+<span style="color:blue">using</span> System.Windows.Media.Animation;
+<span style="color:blue">using</span> System.Windows.Navigation;
+<span style="color:blue">using</span> ContinuationTasks;
+<span style="color:blue">using</span> ContinuationTasks.RIA_Client;
+
+<span style="color:blue">namespace</span> MySilverlightApp1.Views
+{
+    <span style="color:blue">public</span> <span style="color:blue">partial</span> <span style="color:blue">class</span> MyPage2 : Page
+    {
+        <span style="color:blue">private</span> ContinuationEntities&lt;MyDomainContext&gt; _ContContext;
+        <span style="color:blue">private</span> ContinuationEntities&lt;MyDomainContext&gt; ContContext
+        {
+            <span style="color:blue">get</span>
+            {
+                <span style="color:blue">if</span> (_ContContext == <span style="color:blue">null</span>)
+                    _ContContext = <span style="color:blue">new</span> ContinuationEntities&lt;MyDomainContext&gt;
+                                       (myDomainContext, 50);
+                <span style="color:blue">return</span> _ContContext;
+            }
+        }
+
+        <span style="color:blue">private</span> <span style="color:blue">void</span> btnSave_Click(<span style="color:blue">object</span> sender, RoutedEventArgs e)
+        {
+            submittingBusyIndicator.IsBusy = <span style="color:blue">true</span>;
+            ...
+            ContContext.SubmitEntities(myEntityCollection,
+                op =&gt; { op.HandleSubmittedError(); },
+                () =&gt; { _DelayReloader.Start(<span style="color:blue">true</span>);
+                        submittingBusyIndicator.IsBusy = <span style="color:blue">false</span>; });
+            ...
+        }
+    }
+}</pre>
+</div>
+</div>
+</div><div class="ClearBoth"></div>
